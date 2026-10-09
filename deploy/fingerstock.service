@@ -1,0 +1,17 @@
+[Unit]
+Description=FingerStock - estoque de skates de dedo (Spring Boot)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=fingerstock
+Group=fingerstock
+WorkingDirectory=/opt/fingerstock
+EnvironmentFile=/etc/fingerstock/app.env
+ExecStart=/usr/bin/java -Xms128m -Xmx384m -jar /opt/fingerstock/fingerstock.jar
+SuccessExitStatus=143
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

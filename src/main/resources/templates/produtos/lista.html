@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FingerStock · Estoque</title>
+    <link rel="icon" type="image/png" th:href="@{/img/logo.png}">
+    <link rel="stylesheet" th:href="@{/css/estilo.css}">
+</head>
+<body>
+<header class="topo">
+    <div class="container topo-conteudo">
+        <a class="marca" th:href="@{/produtos}"><img class="logo" th:src="@{/img/logo.png}" alt=""> FingerStock</a>
+        <span class="subtitulo">Estoque da loja de skates de dedo</span>
+    </div>
+</header>
+
+<main class="container">
+    <div class="alerta sucesso" th:if="${mensagem}" th:text="${mensagem}"></div>
+
+    <section class="resumo">
+        <div class="cartao">
+            <span class="rotulo">Produtos</span>
+            <strong th:text="${produtos.size()}">0</strong>
+        </div>
+        <div class="cartao">
+            <span class="rotulo">Itens em estoque</span>
+            <strong th:text="${totalItens}">0</strong>
+        </div>
+        <div class="cartao">
+            <span class="rotulo">Valor em estoque</span>
+            <strong th:text="${'R$ ' + #numbers.formatDecimal(valorTotal, 1, 'POINT', 2, 'COMMA')}">R$ 0,00</strong>
+        </div>
+        <div class="cartao" th:classappend="${estoqueBaixo > 0} ? 'atencao'">
+            <span class="rotulo">Estoque baixo</span>
+            <strong th:text="${estoqueBaixo}">0</strong>
+        </div>
+    </section>
+
+    <section class="barra">
+        <form class="filtros" method="get" th:action="@{/produtos}">
+            <input type="search" name="busca" placeholder="Buscar por nome ou marca" th:value="${busca}"
+                   aria-label="Buscar por nome ou marca">
+            <select name="categoria" aria-label="Categoria">
+                <option value="">Todas as categorias</option>
+                <option th:each="c : ${categorias}" th:value="${c}" th:text="${c.descricao}"
+                        th:selected="${c == categoriaSelecionada}"></option>
+            </select>
+            <button type="submit" class="botao secundario">Filtrar</button>
+            <a class="link" th:href="@{/produtos}" th:if="${!busca.isEmpty() or categoriaSelecionada != null}">Limpar</a>
+        </form>
+        <a class="botao" th:href="@{/produtos/novo}">+ Novo produto</a>
+    </section>
+
+    <div class="tabela-wrapper">
+        <table>
+            <thead>
+            <tr>
+                <th>Produto</th>
+                <th>Categoria</th>
+                <th>Marca</th>
+                <th class="num">Preço</th>
+                <th class="num">Qtd.</th>
+                <th class="acoes">Ações</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:if="${produtos.isEmpty()}">
+                <td colspan="6" class="vazio">Nenhum produto encontrado.</td>
+            </tr>
+            <tr th:each="p : ${produtos}">
+                <td>
+                    <div class="produto">
+                        <img class="miniatura" alt="" loading="lazy"
+                             th:src="${p.imagemUrl != null} ? ${p.imagemUrl} : @{${p.categoria.imagem}}"
+                             th:data-padrao="@{${p.categoria.imagem}}"
+                             onerror="this.onerror=null;this.src=this.dataset.padrao;">
+                        <div>
+                            <span class="nome" th:text="${p.nome}">Nome</span>
+                            <span class="descricao" th:if="${p.descricao}" th:text="${p.descricao}"></span>
+                        </div>
+                    </div>
+                </td>
+                <td><span class="etiqueta" th:text="${p.categoria.descricao}">Categoria</span></td>
+                <td th:text="${p.marca} ?: '—'">Marca</td>
+                <td class="num" th:text="${'R$ ' + #numbers.formatDecimal(p.preco, 1, 'POINT', 2, 'COMMA')}">R$ 0,00</td>
+                <td class="num">
+                    <span th:text="${p.quantidade}" th:classappend="${p.estoqueBaixo} ? 'baixo'">0</span>
+                </td>
+                <td class="acoes">
+                    <a class="botao pequeno secundario" th:href="@{/produtos/{id}/editar(id=${p.id})}">Editar</a>
+                    <form method="post" th:action="@{/produtos/{id}/excluir(id=${p.id})}"
+                          th:data-nome="${p.nome}"
+                          onsubmit="return confirm('Excluir o produto &quot;' + this.dataset.nome + '&quot;?');">
+                        <button type="submit" class="botao pequeno perigo">Excluir</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<footer class="rodape container">
+    Trabalho 1 · Infraestrutura Cloud AWS · EC2 + RDS
+</footer>
+</body>
+</html>

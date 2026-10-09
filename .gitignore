@@ -1,0 +1,10 @@
+target/
+*.log
+.idea/
+*.iml
+.vscode/
+.DS_Store
+
+# Credenciais reais nunca vão para o repositório
+app.env
+*.pem
