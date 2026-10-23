@@ -12,6 +12,11 @@ echo ">> Compilando"
 chmod +x mvnw
 ./mvnw -q -DskipTests clean package
 
+echo ">> Atualizando a configuração do Nginx"
+sudo cp deploy/nginx-fingerstock.conf /etc/nginx/conf.d/fingerstock.conf
+sudo nginx -t
+sudo systemctl reload nginx
+
 echo ">> Publicando o jar e reiniciando o serviço"
 sudo install -o fingerstock -g fingerstock -m 640 target/fingerstock.jar /opt/fingerstock/fingerstock.jar
 sudo systemctl restart fingerstock

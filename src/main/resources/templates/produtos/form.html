@@ -11,14 +11,17 @@
 <header class="topo">
     <div class="container topo-conteudo">
         <a class="marca" th:href="@{/produtos}"><img class="logo" th:src="@{/img/logo.png}" alt=""> FingerStock</a>
-        <span class="subtitulo">Estoque da loja de skates de dedo</span>
+        <nav class="menu">
+            <a th:href="@{/loja}">Loja</a>
+            <a class="ativo" th:href="@{/produtos}">Estoque</a>
+        </nav>
     </div>
 </header>
 
 <main class="container estreito">
     <h1 th:text="${produto.id == null} ? 'Novo produto' : 'Editar produto'">Produto</h1>
 
-    <form class="formulario" method="post" th:object="${produto}"
+    <form class="formulario" method="post" enctype="multipart/form-data" th:object="${produto}"
           th:action="${produto.id == null} ? @{/produtos} : @{/produtos/{id}(id=${produto.id})}">
 
         <div class="campo">
@@ -63,10 +66,18 @@
         </div>
 
         <div class="campo">
-            <label for="imagemUrl">URL da imagem</label>
-            <input type="url" id="imagemUrl" th:field="*{imagemUrl}" maxlength="300" placeholder="https://...">
-            <span class="dica">Opcional. Em branco, é usada a ilustração da categoria.</span>
-            <span class="erro" th:errors="*{imagemUrl}"></span>
+            <label for="arquivo">Imagem do produto</label>
+            <div class="upload">
+                <img class="previa" id="previa" alt="" th:if="${produto.imagemSrc != null}" th:src="@{${produto.imagemSrc}}">
+                <div>
+                    <input type="file" id="arquivo" name="arquivo" accept="image/png,image/jpeg,image/webp,image/gif">
+                    <span class="dica">Opcional. PNG, JPG, WEBP ou GIF de até 2 MB. Sem imagem, é usada a ilustração da categoria.</span>
+                    <label class="opcao" th:if="${produto.imagemVersao != null}">
+                        <input type="checkbox" name="removerImagem" value="true"> Remover a imagem atual
+                    </label>
+                </div>
+            </div>
+            <span class="erro" th:if="${erroImagem}" th:text="${erroImagem}"></span>
         </div>
 
         <div class="botoes">
@@ -75,5 +86,15 @@
         </div>
     </form>
 </main>
+
+<script>
+    // Mostra a imagem escolhida antes de salvar
+    document.getElementById('arquivo').addEventListener('change', function () {
+        var previa = document.getElementById('previa');
+        if (previa && this.files[0]) {
+            previa.src = URL.createObjectURL(this.files[0]);
+        }
+    });
+</script>
 </body>
 </html>

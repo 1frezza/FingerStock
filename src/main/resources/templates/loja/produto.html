@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${produto.nome + ' · FingerStock'}">FingerStock</title>
+    <link rel="icon" type="image/png" th:href="@{/img/logo.png}">
+    <link rel="stylesheet" th:href="@{/css/estilo.css}">
+</head>
+<body>
+<header class="topo">
+    <div class="container topo-conteudo">
+        <a class="marca" th:href="@{/loja}"><img class="logo" th:src="@{/img/logo.png}" alt=""> FingerStock</a>
+        <nav class="menu">
+            <a class="ativo" th:href="@{/loja}">Loja</a>
+            <a th:href="@{/produtos}">Estoque</a>
+        </nav>
+    </div>
+</header>
+
+<main class="container">
+    <a class="voltar" th:href="@{/loja(categoria=${produto.categoria})}"
+       th:text="${'← ' + produto.categoria.descricao}">← Categoria</a>
+
+    <div class="alerta sucesso" th:if="${mensagem}" th:text="${mensagem}"></div>
+    <div class="alerta falha" th:if="${erro}" th:text="${erro}"></div>
+
+    <section class="detalhe">
+        <div class="detalhe-foto" th:classappend="${produto.quantidade == 0} ? 'esgotado'">
+            <img th:src="@{${produto.imagemSrc}}" th:alt="${produto.nome}">
+            <span class="selo" th:if="${produto.quantidade == 0}">Esgotado</span>
+        </div>
+
+        <div class="detalhe-info">
+            <span class="item-categoria" th:text="${produto.categoria.descricao}">Categoria</span>
+            <h1 th:text="${produto.nome}">Produto</h1>
+            <span class="item-marca" th:if="${produto.marca}" th:text="${'Marca: ' + produto.marca}">Marca</span>
+            <p class="detalhe-descricao" th:if="${produto.descricao}" th:text="${produto.descricao}"></p>
+
+            <strong class="preco" th:text="${'R$ ' + #numbers.formatDecimal(produto.preco, 1, 'POINT', 2, 'COMMA')}">R$ 0,00</strong>
+
+            <span class="disponibilidade nada" th:if="${produto.quantidade == 0}">Produto esgotado</span>
+            <span class="disponibilidade pouco" th:if="${produto.quantidade > 0 and produto.estoqueBaixo}"
+                  th:text="${produto.quantidade == 1} ? 'Última unidade em estoque' : 'Últimas ' + ${produto.quantidade} + ' unidades em estoque'">Últimas unidades</span>
+            <span class="disponibilidade" th:if="${!produto.estoqueBaixo}"
+                  th:text="${produto.quantidade + ' unidades em estoque'}">Em estoque</span>
+
+            <form method="post" th:action="@{/loja/{id}/comprar(id=${produto.id})}">
+                <input type="hidden" name="detalhe" value="true">
+                <button type="submit" class="botao grande" th:disabled="${produto.quantidade == 0}"
+                        th:text="${produto.quantidade == 0} ? 'Indisponível' : 'Comprar'">Comprar</button>
+            </form>
+        </div>
+    </section>
+
+    <section th:if="${!relacionados.isEmpty()}">
+        <h2 class="secao-titulo">Veja também</h2>
+        <div class="grade">
+            <article class="item" th:each="p : ${relacionados}" th:classappend="${p.quantidade == 0} ? 'esgotado'">
+                <div class="item-foto">
+                    <a th:href="@{/loja/{id}(id=${p.id})}"><img alt="" loading="lazy" th:src="@{${p.imagemSrc}}"></a>
+                    <span class="selo" th:if="${p.quantidade == 0}">Esgotado</span>
+                </div>
+                <div class="item-corpo">
+                    <h2><a th:href="@{/loja/{id}(id=${p.id})}" th:text="${p.nome}">Produto</a></h2>
+                    <span class="item-marca" th:if="${p.marca}" th:text="${p.marca}">Marca</span>
+                </div>
+                <div class="item-rodape">
+                    <strong class="preco" th:text="${'R$ ' + #numbers.formatDecimal(p.preco, 1, 'POINT', 2, 'COMMA')}">R$ 0,00</strong>
+                    <a class="botao secundario" th:href="@{/loja/{id}(id=${p.id})}">Ver</a>
+                </div>
+            </article>
+        </div>
+    </section>
+</main>
+
+<footer class="rodape container">
+    Trabalho 1 · Infraestrutura Cloud AWS · EC2 + RDS
+</footer>
+</body>
+</html>

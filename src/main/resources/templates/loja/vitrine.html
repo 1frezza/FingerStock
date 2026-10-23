@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FingerStock · Loja</title>
+    <link rel="icon" type="image/png" th:href="@{/img/logo.png}">
+    <link rel="stylesheet" th:href="@{/css/estilo.css}">
+</head>
+<body>
+<header class="topo">
+    <div class="container topo-conteudo">
+        <a class="marca" th:href="@{/loja}"><img class="logo" th:src="@{/img/logo.png}" alt=""> FingerStock</a>
+        <nav class="menu">
+            <a class="ativo" th:href="@{/loja}">Loja</a>
+            <a th:href="@{/produtos}">Estoque</a>
+        </nav>
+    </div>
+</header>
+
+<main class="container">
+    <section class="vitrine-topo">
+        <div>
+            <h1>Skates de dedo e acessórios</h1>
+            <p>Shapes, trucks, rodinhas, rampas e tudo para o seu fingerboard.</p>
+        </div>
+        <form class="filtros" method="get" th:action="@{/loja}">
+            <input type="hidden" name="categoria" th:if="${categoriaSelecionada != null}" th:value="${categoriaSelecionada}">
+            <input type="search" name="busca" placeholder="Buscar produto ou marca" th:value="${busca}"
+                   aria-label="Buscar produto ou marca">
+            <button type="submit" class="botao secundario">Buscar</button>
+        </form>
+    </section>
+
+    <nav class="categorias" aria-label="Categorias">
+        <a th:href="@{/loja(busca=${busca.isEmpty() ? null : busca})}"
+           th:classappend="${categoriaSelecionada == null} ? 'ativo'">Todos</a>
+        <a th:each="c : ${categorias}" th:text="${c.descricao}"
+           th:href="@{/loja(categoria=${c}, busca=${busca.isEmpty() ? null : busca})}"
+           th:classappend="${c == categoriaSelecionada} ? 'ativo'">Categoria</a>
+    </nav>
+
+    <div class="alerta sucesso" th:if="${mensagem}" th:text="${mensagem}"></div>
+    <div class="alerta falha" th:if="${erro}" th:text="${erro}"></div>
+
+    <p class="vazio" th:if="${produtos.isEmpty()}">Nenhum produto encontrado.</p>
+
+    <section class="grade">
+        <article class="item" th:each="p : ${produtos}" th:classappend="${p.quantidade == 0} ? 'esgotado'">
+            <div class="item-foto">
+                <a th:href="@{/loja/{id}(id=${p.id})}"><img alt="" loading="lazy" th:src="@{${p.imagemSrc}}"></a>
+                <span class="selo" th:if="${p.quantidade == 0}">Esgotado</span>
+                <span class="selo ultimas" th:if="${p.quantidade > 0 and p.estoqueBaixo}"
+                      th:text="${p.quantidade == 1} ? 'Última unidade' : 'Últimas ' + ${p.quantidade} + ' unidades'">Últimas unidades</span>
+            </div>
+            <div class="item-corpo">
+                <span class="item-categoria" th:text="${p.categoria.descricao}">Categoria</span>
+                <h2><a th:href="@{/loja/{id}(id=${p.id})}" th:text="${p.nome}">Produto</a></h2>
+                <span class="item-marca" th:if="${p.marca}" th:text="${p.marca}">Marca</span>
+                <p class="item-descricao" th:if="${p.descricao}" th:text="${p.descricao}"></p>
+            </div>
+            <div class="item-rodape">
+                <strong class="preco" th:text="${'R$ ' + #numbers.formatDecimal(p.preco, 1, 'POINT', 2, 'COMMA')}">R$ 0,00</strong>
+                <form method="post" th:action="@{/loja/{id}/comprar(id=${p.id})}">
+                    <input type="hidden" name="busca" th:value="${busca}">
+                    <input type="hidden" name="categoria" th:if="${categoriaSelecionada != null}" th:value="${categoriaSelecionada}">
+                    <button type="submit" class="botao" th:disabled="${p.quantidade == 0}"
+                            th:text="${p.quantidade == 0} ? 'Indisponível' : 'Comprar'">Comprar</button>
+                </form>
+            </div>
+        </article>
+    </section>
+</main>
+
+<footer class="rodape container">
+    Trabalho 1 · Infraestrutura Cloud AWS · EC2 + RDS
+</footer>
+</body>
+</html>

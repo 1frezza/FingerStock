@@ -15,7 +15,6 @@ import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
@@ -61,10 +60,9 @@ public class Produto {
     @Column(length = 500)
     private String descricao;
 
-    @Size(max = 300, message = "A URL da imagem deve ter no máximo 300 caracteres")
-    @Pattern(regexp = "^$|^https?://.+", message = "Informe uma URL iniciando com http:// ou https://")
-    @Column(name = "imagem_url", length = 300)
-    private String imagemUrl;
+    /** Preenchido quando o produto tem imagem enviada; muda a cada novo upload (evita cache antigo). */
+    @Column(name = "imagem_versao")
+    private Long imagemVersao;
 
     @Column(name = "criado_em", nullable = false, updatable = false)
     private LocalDateTime criadoEm;
@@ -155,12 +153,20 @@ public class Produto {
         this.descricao = descricao;
     }
 
-    public String getImagemUrl() {
-        return imagemUrl;
+    public Long getImagemVersao() {
+        return imagemVersao;
     }
 
-    public void setImagemUrl(String imagemUrl) {
-        this.imagemUrl = imagemUrl == null || imagemUrl.isBlank() ? null : imagemUrl.trim();
+    public void setImagemVersao(Long imagemVersao) {
+        this.imagemVersao = imagemVersao;
+    }
+
+    /** Caminho da imagem a exibir: a enviada pelo estoque ou, na falta dela, a ilustração da categoria. */
+    public String getImagemSrc() {
+        if (imagemVersao != null && id != null) {
+            return "/produtos/" + id + "/imagem?v=" + imagemVersao;
+        }
+        return categoria != null ? categoria.getImagem() : null;
     }
 
     public LocalDateTime getCriadoEm() {
